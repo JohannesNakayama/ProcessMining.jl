@@ -6,3 +6,8 @@
 /dev/
 /docs/build/
 /docs/site/
+*.csv
+*.xes
+*.xes.gz
+/data/
+unstructured_testing.jl
