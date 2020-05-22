@@ -3,6 +3,10 @@ uuid = "5958638c-a5b4-4085-b238-a8ab1b5d925e"
 authors = ["Johannes Nakayama"]
 version = "0.1.0"
 
+[deps]
+DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+EzXML = "8f5d6c58-4d21-5cfd-889c-e3ad7ee6a615"
+
 [compat]
 julia = "1"
 

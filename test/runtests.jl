@@ -1,7 +1,4 @@
 using ProcessMining
 using Test
 
-@testset "ProcessMining.jl" begin
-    # Write your own tests here.
-    @test ProcessMining.f(2) == 4
-end
+@time ProcessMining.read_xes(joinpath("data", "Performance.xes"))
