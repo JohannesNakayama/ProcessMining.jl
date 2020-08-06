@@ -1,6 +1,6 @@
 mutable struct Event
     name::String
-    timestamp::Union{Dates.Date, String}
+    timestamp::String
     id::String
     instance::String
     transition::String

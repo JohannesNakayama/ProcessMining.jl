@@ -100,8 +100,8 @@ end
 
 function pop_dict!(dict::Dict, key::String)
     if key in keys(dict)
-        id = dict["concept:name"]
-        delete!(dict, "concept:name")
+        id = dict[key]
+        delete!(dict, key)
     else
         id = "NA"
     end
