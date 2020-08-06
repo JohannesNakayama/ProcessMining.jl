@@ -5,34 +5,13 @@ function read_xes(path)
 end
 
 function create_eventlog(xml_doc)
-    global_event_attributes = extract_global_attributes(xml_doc, "event")
-    global_trace_attributes = extract_global_attributes(xml_doc, "trace")
-    event_classifiers = extract_event_classifiers(xml_doc)
     traces = extract_traces(xml_doc)
+    event_classifiers = extract_event_classifiers(xml_doc)
     eventlog = EventLog(
-        global_event_attributes,
-        global_trace_attributes,
-        event_classifiers,
-        traces
+        traces,
+        event_classifiers
     )
     return eventlog
-end
-
-function extract_global_attributes(xml_doc, scope)
-    namespace = EzXML.namespace(xml_doc.root)
-    xpath_expression = "./ns:global[@scope='" * scope * "']/*"
-    global_attribute_nodes = EzXML.findall(
-        xpath_expression,
-        xml_doc.root,
-        ["ns"=>namespace]
-    )
-    global_attributes = Dict()
-    for node in global_attribute_nodes
-        key = node["key"]
-        value = node["value"]
-        global_attributes[key] = value
-    end
-    return global_attributes
 end
 
 function extract_event_classifiers(xml_doc)
@@ -72,8 +51,10 @@ function create_trace(trace_node, namespace)
         trace_node,
         ["ns"=>namespace]
     )
+    name = pop_dict!(metadata, "concept:name")
+    id = pop_dict!(metadata, "identity:id")
     events = [create_event(e) for e in event_nodes]
-    trace = Trace(metadata, events)
+    trace = Trace(name, metadata, events)
     return trace
 end
 
@@ -100,8 +81,31 @@ function create_event(event_node)
         value = attribute["value"]
         event_attributes[key] = value
     end
-    event = Event(event_attributes)
+    name = pop_dict!(event_attributes, "concept:name")
+    timestamp = pop_dict!(event_attributes, "time:timestamp")
+    id = pop_dict!(event_attributes, "identity:id")
+    instance = pop_dict!(event_attributes, "concept:instance")
+    transition = pop_dict!(event_attributes, "lifecycle:transition")
+    resource = pop_dict!(event_attributes, "org:resource")
+    role = pop_dict!(event_attributes, "org:role")
+    group = pop_dict!(event_attributes, "org:group")
+    event = Event(
+        name, timestamp, id,
+        instance, transition,
+        resource, role, group,
+        event_attributes
+    )
     return event
+end
+
+function pop_dict!(dict::Dict, key::String)
+    if key in keys(dict)
+        id = dict["concept:name"]
+        delete!(dict, "concept:name")
+    else
+        id = "NA"
+    end
+    return id
 end
 
 # NOTE: add streaming option for large files
