@@ -1,3 +1,5 @@
 using ProcessMining
 
-read_xes(joinpath("data", "Social_Network.xes"))
+eventlog = read_xes(joinpath("data", "Sepsis_Cases.xes"))
+
+eventlog
