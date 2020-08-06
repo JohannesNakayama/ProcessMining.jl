@@ -54,7 +54,7 @@ function create_trace(trace_node, namespace)
     name = pop_dict!(metadata, "concept:name")
     id = pop_dict!(metadata, "identity:id")
     events = [create_event(e) for e in event_nodes]
-    trace = Trace(name, metadata, events)
+    trace = Trace(name, id, metadata, events)
     return trace
 end
 
