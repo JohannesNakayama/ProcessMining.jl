@@ -1,7 +1,6 @@
 module ProcessMining
-
     import EzXML
-    
+    include("types.jl")
     include("io.jl")
-
-end # module
+    export read_xes
+end
