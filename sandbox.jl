@@ -1,6 +1,6 @@
 using ProcessMining
 
-eventlog = read_xes(joinpath("data", "Trace_ABCD.xes"))
+eventlog = read_xes(joinpath("data", "Performance.xes"))
 
 using Dates
 

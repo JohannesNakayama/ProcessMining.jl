@@ -1,6 +1,7 @@
 module ProcessMining
 
     import EzXML
+    import Dates
 
     export Event
     export Trace
