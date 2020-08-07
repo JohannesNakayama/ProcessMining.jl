@@ -9,3 +9,8 @@ info(eventlog)
 eventlog
 eventlog.traces[1]
 eventlog.traces[1].events[1]
+
+eventlog
+
+filter(eventlog, x -> x.name == "173688", :traces)
+filter!(eventlog, x -> x.name == "173688", :traces)
