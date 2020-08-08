@@ -2,6 +2,8 @@ module ProcessMining
 
     import EzXML
 
+    const DEFAULT_NAMESPACE = "http://www.xes-standard.org/"
+
     export Event
     export Trace
     export EventLog

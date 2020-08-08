@@ -15,7 +15,7 @@ function create_eventlog(xml_doc)
 end
 
 function extract_event_classifiers(xml_doc)
-    namespace = EzXML.namespace(xml_doc.root)
+    namespace = get_namespace(xml_doc)
     xpath_expression = "./ns:classifier"
     event_classifier_nodes = EzXML.findall(
         xpath_expression,
@@ -32,7 +32,7 @@ function extract_event_classifiers(xml_doc)
 end
 
 function extract_traces(xml_doc)
-    namespace = EzXML.namespace(xml_doc.root)
+    namespace = get_namespace(xml_doc)
     xpath_expression = "./ns:trace"
     trace_nodes = EzXML.findall(
         xpath_expression,
@@ -41,6 +41,14 @@ function extract_traces(xml_doc)
     )
     traces = [create_trace(t, namespace) for t in trace_nodes]
     return traces
+end
+
+function get_namespace(xml_doc)
+    try
+        return EzXML.namespace(xml_doc.root)
+    catch Exception
+        return DEFAULT_NAMESPACE
+    end
 end
 
 function create_trace(trace_node, namespace)
