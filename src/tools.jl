@@ -7,7 +7,9 @@ function Base.filter(eventlog::EventLog, filter_function::Function, field::Symbo
 end
 
 function Base.filter!(eventlog::EventLog, filter_function::Function, field::Symbol)
-    eventlog = filter(eventlog, filter_function, field)
+    trace_filter = map(filter_function, getproperty(eventlog, field))
+    filtered_field = getproperty(eventlog, field)[trace_filter]
+    setproperty!(eventlog, field, filtered_field)
     return eventlog
 end
 

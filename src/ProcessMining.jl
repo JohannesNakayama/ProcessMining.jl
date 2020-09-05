@@ -1,6 +1,8 @@
 module ProcessMining
 
     import EzXML
+    import DataFrames
+    using AutoHashEquals
 
     const DEFAULT_NAMESPACE = "http://www.xes-standard.org/"
 
@@ -12,6 +14,7 @@ module ProcessMining
     export length
 
     include("types.jl")
+    include("petrinets.jl")
     include("io.jl")
     include("utilities.jl")
     include("tools.jl")
