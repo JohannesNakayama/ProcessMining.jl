@@ -16,7 +16,9 @@
 # 7. Determine the flow relation
 # 8. Put everything together
 
-eventlog
+using ProcessMining
+
+eventlog = read_xes(joinpath("data", "Performance.xes"))
 
 mutable struct Footprint{T}
     colnames::Array{T}
@@ -42,7 +44,7 @@ function extract_activity_set(extracted_event_traces::AbstractArray)
     return unique(collect(Iterators.flatten(extracted_event_traces)))
 end
 
-function get_direct_succession_relation(extracted_event_traces)
+function extract_direct_succession_relation(extracted_event_traces)
     direct_succession_relation = Set([])
     for trace in extracted_event_traces
         for i in 1:length(trace)
@@ -54,7 +56,7 @@ function get_direct_succession_relation(extracted_event_traces)
     return direct_succession_relation
 end
 
-function get_causality_relation(direct_succession_relation)
+function extract_causality_relation(direct_succession_relation)
     causality_relation = Set([])
     for tup in direct_succession_relation
         if !((tup[2], tup[1]) in direct_succession_relation)
@@ -64,7 +66,7 @@ function get_causality_relation(direct_succession_relation)
     return causality_relation
 end
 
-function get_parallel_relation(direct_succession_relation)
+function extract_parallel_relation(direct_succession_relation)
     parallel_relation = Set([])
     for tup in direct_succession_relation
         if ((tup[2], tup[1]) in direct_succession_relation) && !((tup[2], tup[1]) in parallel_relation)
@@ -74,11 +76,61 @@ function get_parallel_relation(direct_succession_relation)
     return parallel_relation
 end
 
-function get_choice_relation(direct_succession_relation, activity_set)
+function extract_choice_relation(direct_succession_relation, activity_set)
     all_pairs = Set([(a, b) for a in activity_set for b in activity_set])
     choice_relation = setdiff(all_pairs, direct_succession_relation)
     return choice_relation
 end
+
+function extract_place_pairs(causality_relation, choice_relation)
+    place_pairs = []
+    for mapping in causality_relation
+        push!(place_pairs, (Set([mapping[1]]), Set([mapping[2]])))
+    end
+    print(place_pairs)
+    place_pairs = merge_append_sets!(place_pairs, choice_relation)
+    return place_pairs
+end
+
+function merge_append_sets!(place_pairs, choice_relation)
+    counter = 0
+    for p1 in place_pairs
+        for p2 in place_pairs
+            if p1 != p2
+                if is_unrelated(p1, p2, choice_relation)
+                    print("pushed!\n")
+                    place_pairs = push!(place_pairs, (union(p1[1], p2[1]), union(p1[2], p2[2])))
+                    counter += 1
+                end
+            end
+        end
+    end
+    if counter > 0
+        place_pairs = merge_append_sets!(place_pairs, choice_relation)
+    end
+    return place_pairs
+end
+
+function is_unrelated(p1, p2, choice_relation)
+    is_unrelated_predecessor = (
+        (issubset(p1[1], p2[1]) || issubset(p2[1], p1[1]))
+        && ((p1[1], p2[1]) in choice_relation || ((p2[1], p1[1]) in choice_relation))
+    )
+    is_unrelated_successor = (
+        (issubset(p1[2], p2[2]) || issubset(p2[2], p1[2]))
+        && (((p1[2], p2[2]) in choice_relation) || (p2[2], p1[2]) in choice_relation)
+    )
+    return is_unrelated_predecessor && is_unrelated_successor
+end
+
+
+pp = extract_place_pairs(causality_relation, choice_relation)
+
+("A_ACTIVATED", "A_ACCEPTED") in choice_relation
+
+a = Set([1, 2, 3])
+
+a = push!(a, 5)
 
 Matrix{Symbol}(undef, 100, 100)
 
@@ -88,7 +140,7 @@ start_activities = extract_start_activities(extracted_event_traces)
 end_activities = extract_end_activities(extracted_event_traces)
 activity_set = extract_activity_set(extracted_event_traces)
 
-direct_succession_relation = get_direct_succession_relation(extracted_event_traces)
-causality_relation = get_causality_relation(direct_succession_relation)
-parallel_relation = get_parallel_relation(direct_succession_relation)
-choice_relation = get_choice_relation(direct_succession_relation, activity_set)
+direct_succession_relation = extract_direct_succession_relation(extracted_event_traces)
+causality_relation = extract_causality_relation(direct_succession_relation)
+parallel_relation = extract_parallel_relation(direct_succession_relation)
+choice_relation = extract_choice_relation(direct_succession_relation, activity_set)
