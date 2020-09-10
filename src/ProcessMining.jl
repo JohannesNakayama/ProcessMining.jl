@@ -3,6 +3,7 @@ module ProcessMining
     import EzXML
     import DataFrames
     using AutoHashEquals
+    using Pipe
 
     const DEFAULT_NAMESPACE = "http://www.xes-standard.org/"
 

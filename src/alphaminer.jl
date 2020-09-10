@@ -16,12 +16,6 @@
 # 7. Determine the flow relation
 # 8. Put everything together
 
-# OBJECTS FOR WORKFLOW
-begin
-    using ProcessMining
-    eventlog = read_xes(joinpath("data", "Performance.xes"))
-    eventlog2 = read_xes(joinpath("data", "road_fines.xes"))
-end
 # ------------------------
 
 # MAYBE NOT NEEDED
@@ -40,7 +34,11 @@ function extract_event_traces(eventlog::EventLog)
 end
 
 function extract_activity_set(extracted_event_traces::AbstractArray)
-    return unique(collect(Iterators.flatten(extracted_event_traces)))
+    activity_set = extracted_event_traces |>
+        Iterators.flatten |>
+        collect |>
+        unique
+    return activity_set
 end
 # ------------------------
 
@@ -80,8 +78,9 @@ end
 function extract_parallel_relation(direct_succession_relation)
     parallel_relation = Set(Tuple{String, String}[])
     for tup in direct_succession_relation
-        if ((tup[2], tup[1]) in direct_succession_relation) && !((tup[2], tup[1]) in parallel_relation)
+        if !(tup in parallel_relation) && ((tup[2], tup[1]) in direct_succession_relation)
             push!(parallel_relation, tup)
+            push!(parallel_relation, (tup[2], tup[1]))
         end
     end
     return parallel_relation
@@ -152,20 +151,12 @@ Matrix{Symbol}(undef, 100, 100)
 
 
 # TESTING
-
 begin
+    using ProcessMining
+    using Pipe
+    # eventlog = read_xes(joinpath("data", "Performance.xes"))
+    eventlog = read_xes(joinpath("data", "road_fines.xes"))
     extracted_event_traces = extract_event_traces(eventlog)
-    start_activities = extract_start_activities(extracted_event_traces)
-    end_activities = extract_end_activities(extracted_event_traces)
-    activity_set = extract_activity_set(extracted_event_traces)
-    direct_succession_relation = extract_direct_succession_relation(extracted_event_traces)
-    causality_relation = extract_causality_relation(direct_succession_relation)
-    parallel_relation = extract_parallel_relation(direct_succession_relation)
-    choice_relation = extract_choice_relation(direct_succession_relation, activity_set)
-end
-
-begin
-    extracted_event_traces = extract_event_traces(eventlog2)
     start_activities = extract_start_activities(extracted_event_traces)
     end_activities = extract_end_activities(extracted_event_traces)
     activity_set = extract_activity_set(extracted_event_traces)
