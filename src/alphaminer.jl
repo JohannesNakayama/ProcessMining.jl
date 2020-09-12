@@ -26,6 +26,10 @@
 # end
 # ------------------------
 
+
+using ProcessMining
+using Pipe
+
 # 1) GET RAW TRACES AND ACTIVITY SET FROM THE LOG
 function extract_event_traces(eventlog::EventLog)
     return [
@@ -94,68 +98,79 @@ end
 # ------------------------
 
 # 4b) GET SET X_L
-function extract_place_pairs(causality_relation, choice_relation)
-    place_pairs = []
-    for mapping in causality_relation
-        push!(place_pairs, (Set([mapping[1]]), Set([mapping[2]])))
+function iteratively_build_x(causality_relation, choice_relation)
+    place_pairs = get_initial_place_pairs(causality_relation)
+    while true
+        size = length(place_pairs)
+        build_place_pairs!(place_pairs, choice_relation, "forward")
+        build_place_pairs!(place_pairs, choice_relation, "backward")
+        new_size = length(place_pairs)
+        if size == new_size
+            break
+        end
     end
-    place_pairs = merge_append_sets!(place_pairs, choice_relation)
     return place_pairs
 end
 
-function merge_append_sets!(place_pairs, choice_relation)
-    counter = 0
+function get_initial_place_pairs(causality_relation)
+    place_pairs = Set([])
+    for mapping in causality_relation
+        push!(place_pairs, (Set([mapping[1]]), Set([mapping[2]])))
+    end
+    return place_pairs
+end
+
+function build_place_pairs!(place_pairs, choice_relation, mode::String)
+    if mode == "forward"
+        a = 1
+        b = 2
+    elseif mode == "backward"
+        a = 2
+        b = 1
+    end
+    place_pairs_addition = Set([])
     for p1 in place_pairs
         for p2 in place_pairs
-            if p1 != p2
-                if is_unrelated(p1, p2, choice_relation)
-                    print("pushed!\n")
-                    place_pairs = push!(place_pairs, (union(p1[1], p2[1]), union(p1[2], p2[2])))
-                    counter += 1
+            if p1 != p2 && (p1[a] == p2[a])
+                combinations = get_combinations(p1, p2, b)
+                flag = all_combinations_unrelated(combinations, choice_relation)
+                if flag && (mode == "forward")
+                    push!(place_pairs_addition, (p1[a], union(p1[b], p2[b])))
+                elseif flag && (mode == "backward")
+                    push!(place_pairs_addition, (union(p1[b], p2[b]), p1[a]))
                 end
             end
         end
     end
-    if counter > 0
-        place_pairs = merge_append_sets!(place_pairs, choice_relation)
-    end
+    union!(place_pairs, place_pairs_addition)
     return place_pairs
 end
 
-# !!!!KNACKPUNKT!!!!
-function is_unrelated(p1, p2, choice_relation)
-    is_unrelated_predecessor = (
-        (issubset(p1[1], p2[1]) || issubset(p2[1], p1[1]))
-        && (((first(p1[1]), first(p2[1])) in choice_relation) || ((first(p2[1]), first(p1[1])) in choice_relation))
-    )
-    is_unrelated_successor = (
-        (issubset(p1[2], p2[2]) || issubset(p2[2], p1[2]))
-        && (((first(p1[2]), first(p2[2])) in choice_relation) || ((first(p2[2]), first(p1[2])) in choice_relation))
-    )
-    return is_unrelated_predecessor && is_unrelated_successor
+function get_combinations(p1, p2, b)
+    combinations = []
+    for elem_p1 in collect(p1[b])
+        for elem_p2 in collect(p2[b])
+            push!(combinations, (elem_p1, elem_p2))
+        end
+    end
+    return combinations
+end
+
+function all_combinations_unrelated(combinations, choice_relation)
+    for comb in combinations
+        if !(comb in choice_relation)
+            return false
+        end
+    end
+    return true
 end
 # ------------------------
 
 
 # --------------------------- TESTING --------------------------- #
-
-pp = extract_place_pairs(causality_relation, choice_relation)
-
-merge_append_sets!(pp, choice_relation)
-
-is_unrelated(pp[14], pp[16], choice_relation)
-
-
-
-Matrix{Symbol}(undef, 100, 100)
-
-
-# TESTING
 begin
-    using ProcessMining
-    using Pipe
-    # eventlog = read_xes(joinpath("data", "Performance.xes"))
-    eventlog = read_xes(joinpath("data", "road_fines.xes"))
+    EVENT_LOG_FILE = "road_fines.xes"  # alternative: Performance.xes
+    eventlog = read_xes(joinpath("data", EVENT_LOG_FILE))
     extracted_event_traces = extract_event_traces(eventlog)
     start_activities = extract_start_activities(extracted_event_traces)
     end_activities = extract_end_activities(extracted_event_traces)
@@ -164,4 +179,5 @@ begin
     causality_relation = extract_causality_relation(direct_succession_relation)
     parallel_relation = extract_parallel_relation(direct_succession_relation)
     choice_relation = extract_choice_relation(direct_succession_relation, activity_set)
+    X = iteratively_build_x(causality_relation, choice_relation)
 end
