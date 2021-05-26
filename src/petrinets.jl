@@ -1,9 +1,5 @@
-using AutoHashEquals
-
-mutable struct PetriNet
-    places::Array{Place}
-    transitions::Array{Transition}
-    arcs::Array{Union{Tuple{Place, Transition}, Tuple{Transition, Place}}}
+@auto_hash_equals mutable struct Transition
+    id::Int
 end
 
 mutable struct Place
@@ -11,8 +7,10 @@ mutable struct Place
     marking::Int
 end
 
-@auto_hash_equals mutable struct Transition
-    id::Int
+mutable struct PetriNet
+    places::Array{Place}
+    transitions::Array{Transition}
+    arcs::Array{Union{Tuple{Place, Transition}, Tuple{Transition, Place}}}
 end
 
 function fire!(transition::Transition, model::PetriNet)
@@ -78,16 +76,18 @@ mutable struct WorkFlowNet
 end
 
 # light weight version test
-places = [Place(1, 2), Place(2, 0)]
-transitions = [Transition(1)]
-arcs = [(places[1], transitions[1]), (transitions[1], places[2])]
-model = PetriNet(places, transitions, arcs)
-fire(model.transitions[1], model)
-model
-add_place!(model, 3)
-add_transition!(model)
-add_arc!(model, model.places[1], model.transitions[2])
-add_arc!(model, model.transitions[2], model.places[2])
+# places = [Place(1, 2), Place(2, 0)]
+# transitions = [Transition(1)]
+# arcs = [(places[1], transitions[1]), (transitions[1], places[2])]
+# model = PetriNet(places, transitions, arcs)
+# fire(model.transitions[1], model)
+# model
+# add_place!(model, 3)
+# add_transition!(model)
+# add_arc!(model, model.places[1], model.transitions[2])
+# add_arc!(model, model.transitions[2], model.places[2])
+# print(model) 
+
 
 # ----- MORE IDEAS ----- #
 # reachability graph
