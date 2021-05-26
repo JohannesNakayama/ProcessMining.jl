@@ -116,4 +116,4 @@ function pop_dict!(dict::Dict, key::String)
     return id
 end
 
-# NOTE: add streaming option for large files
+# TODO: add streaming option for large files

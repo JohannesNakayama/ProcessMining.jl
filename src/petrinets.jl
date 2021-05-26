@@ -14,7 +14,7 @@ mutable struct PetriNet
 end
 
 function fire!(transition::Transition, model::PetriNet)
-    if is_enabled(tranition, model)
+    if is_enabled(transition, model)
         update_markings!(transition, model)
     else
         print("Transition is not enabled\nDid not fire")
@@ -67,7 +67,7 @@ function add_arc!(model::PetriNet, from::Transition, to::Place)
     return model
 end
 
-mutable struct WorkFlowNet
+mutable struct WorkFlowNet <: PetriNet
     source::Int
     sink::Int
     places::Array{Place}

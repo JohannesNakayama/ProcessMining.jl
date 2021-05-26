@@ -18,7 +18,6 @@ module ProcessMining
     include("petrinets.jl")
     include("io.jl")
     include("utilities.jl")
-    include("tools.jl")
     include("algorithms.jl")
 
 end
