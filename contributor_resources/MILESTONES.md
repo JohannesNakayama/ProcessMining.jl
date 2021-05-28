@@ -11,7 +11,7 @@ This document outlines the next milestones for this project that I hope will be 
 
 *Target Date*: to be determined
 
-As a proof of concept, for milestone 1, ProcessMining.jl should be able to provide a very basic "naive" workflow that enables mining and pruning directly-follows graphs from event logs. For that, the types and structs for the algorithm inputs and outputs should be relatively solid already. I/O operations take specific precedence in this phase: This should work reliably. In the best case, this is already good enough so that it doesn't change too much in the future. 
+As a proof of concept, for milestone 1, ProcessMining.jl should be able to provide a very basic "naive" workflow that enables mining and pruning directly-follows graphs from event logs. The types and structs for the inputs and outputs of the algorithm should be relatively solid already. I/O operations take precedence in this phase: They should work reliably and best case scenario, they are already good enough so that they don't change too much in the future. 
 
 **Requirements**:
 
@@ -43,7 +43,7 @@ It will take some time until this package will be usable for professional use ca
 
 :red_circle: Alpha Miner works: The Alpha algorithm is implemented and works reliably. A workflow that gets the user from a XES event log to a workflow net should be established.
 
-:red_circle: Educational materials with example are set up (maybe part of the documentation, or--alternatively--as scripts within the repository). [Pluto.jl](https://github.com/fonsp/Pluto.jl) looks promising for this. 
+:red_circle: Educational materials with examples are set up (maybe part of the documentation, or--alternatively--as scripts within the repository). [Pluto.jl](https://github.com/fonsp/Pluto.jl) looks promising for this. 
 
 
 

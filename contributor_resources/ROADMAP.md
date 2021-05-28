@@ -9,6 +9,9 @@ This document is intended for unstructured or partially structured notes about t
 
 ### Immediate Next Steps
 
+create some guidelines for creating PRs  
+come up with a good branch structure for the project 
+
 
 
 
