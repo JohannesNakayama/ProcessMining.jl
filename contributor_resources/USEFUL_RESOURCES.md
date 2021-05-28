@@ -1,4 +1,13 @@
-# Julia
+# :bookmark_tabs: Useful Resources :bookmark_tabs:
+
+For anyone interested in getting involved with the project, the resources provided here should be a great place to start learning and getting acquainted with the required concepts and techniques. This document is intended to be a continuous work in progress, additions are welcome.
+
+
+
+
+---
+
+### Julia
 
 [This tutorial](https://www.youtube.com/watch?v=QVmU29rCjaA) was really helpful for me to learn about how to develop Julia packages. As of recently, the [documentation for Pkg.jl](https://docs.julialang.org/en/v1/stdlib/Pkg/) has become much more helpful as well. 
 
@@ -12,10 +21,14 @@ So far, the I/O module only supports XES files, but in the future, CSV and other
 
 [Chris Rackauckas](https://github.com/ChrisRackauckas) is a great person to follow on Github for anyone interested in Julia. :grin:
 
+Although [Jupyter Notebooks](https://jupyterlab.readthedocs.io/en/latest/) are great for using Julia interactively, there is a more "Julian" notebook alternative called [Pluto.jl](https://github.com/fonsp/Pluto.jl).
 
 
 
-# Process Mining
+
+---
+
+### Process Mining
 
 If you're new to process mining, [this course](https://www.coursera.org/learn/process-mining) is a fantastic place to start.
 
@@ -30,7 +43,9 @@ Other open source process mining tools include [ProM](https://www.promtools.org/
 
 
 
-# Visualization
+---
+
+### Visualization
 
 [GraphViz](https://graphviz.org/) is a graph visualization software with APIs to many languages. It works on the [DOT language](https://graphviz.org/doc/info/lang.html) which is basically a graph markup language. There is a [Julia interface](https://github.com/Keno/GraphViz.jl) to GraphViz, but the package is not registered and the project seems to be abandoned. For the visualization of Workflow nets, we might look into building our own DOT engine, however, we will probably not need to build a module that implements all of the DOT language as we will likely need only parts of it. 
 
@@ -41,7 +56,9 @@ A little further down the line, we might look into [Dash.jl](https://github.com/
 
 
 
-# APIs
+---
+
+### APIs
 
 As an example for a very good API, I recommend [scikit-learn](https://scikit-learn.org/stable/getting_started.html), a Python library which provides implementations of most common machine learning models. 
 This is a little bit off topic, but in terms of the ProcessMining.jl API, I want to achieve a workflow that "feels" a little bit similar. Imo, the scikit-learn API abstracts from the machine learning workflow very well. Most models are built like this:
@@ -64,12 +81,9 @@ Obviously, this is severely oversimplified, but understanding these very simple 
 
 
 
-# Code Style
+---
+
+### Code Style
 
 [Clean Code](https://www.oreilly.com/library/view/clean-code-a/9780136083238/) is a great read with regard to writing readable and maintainable code (this is not an affiliate link). The book is not cheap, but imo it's worth the money. However, "clean code" has become a notion in and off itself and there are boatloads of free resources on the Internet too. [This gist](https://gist.github.com/wojteklu/73c6914cc446146b8b533c0988cf8d29) is a good reference guide for the book, but I think it will be most useful to people who have already read it.
 
-
-
-
-
-THIS IS A WORK IN PROGRESS. 
