@@ -67,13 +67,13 @@ function add_arc!(model::PetriNet, from::Transition, to::Place)
     return model
 end
 
-mutable struct WorkFlowNet <: PetriNet
-    source::Int
-    sink::Int
-    # places::Array{Place}
-    # transitions::Array{Transition}
-    # arcs::Array{Union{Tuple{Place, Transition}, Tuple{Transition, Place}}}
-end
+# mutable struct WorkFlowNet <: PetriNet
+#     source::Int
+#     sink::Int
+#     # places::Array{Place}
+#     # transitions::Array{Transition}
+#     # arcs::Array{Union{Tuple{Place, Transition}, Tuple{Transition, Place}}}
+# end
 
 # light weight version test
 # places = [Place(1, 2), Place(2, 0)]
