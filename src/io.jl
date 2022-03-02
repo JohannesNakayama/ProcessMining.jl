@@ -1,10 +1,10 @@
 function read_xes(path)
     xml_doc = EzXML.readxml(path)
-    eventlog = create_eventlog(xml_doc)
+    eventlog = eventlog_from_xml(xml_doc)
     return eventlog
 end
 
-function create_eventlog(xml_doc)
+function eventlog_from_xml(xml_doc)
     traces = extract_traces(xml_doc)
     event_classifiers = extract_event_classifiers(xml_doc)
     eventlog = EventLog(
@@ -12,6 +12,18 @@ function create_eventlog(xml_doc)
         event_classifiers
     )
     return eventlog
+end
+
+function extract_traces(xml_doc)
+    namespace = get_namespace(xml_doc)
+    xpath_expression = "./ns:trace"
+    trace_nodes = EzXML.findall(
+        xpath_expression,
+        xml_doc.root,
+        ["ns"=>namespace]
+    )
+    traces = [create_trace(t, namespace) for t in trace_nodes]
+    return traces
 end
 
 function extract_event_classifiers(xml_doc)
@@ -31,18 +43,6 @@ function extract_event_classifiers(xml_doc)
     return event_classifiers
 end
 
-function extract_traces(xml_doc)
-    namespace = get_namespace(xml_doc)
-    xpath_expression = "./ns:trace"
-    trace_nodes = EzXML.findall(
-        xpath_expression,
-        xml_doc.root,
-        ["ns"=>namespace]
-    )
-    traces = [create_trace(t, namespace) for t in trace_nodes]
-    return traces
-end
-
 function get_namespace(xml_doc)
     try
         return EzXML.namespace(xml_doc.root)
@@ -59,8 +59,8 @@ function create_trace(trace_node, namespace)
         trace_node,
         ["ns"=>namespace]
     )
-    name = pop_dict!(metadata, "concept:name")
-    id = pop_dict!(metadata, "identity:id")
+    name = pop_or_na!(metadata, "concept:name")
+    id = pop_or_na!(metadata, "identity:id")
     events = [create_event(e) for e in event_nodes]
     trace = Trace(name, id, metadata, events)
     return trace
@@ -89,14 +89,14 @@ function create_event(event_node)
         value = attribute["value"]
         event_attributes[key] = value
     end
-    name = pop_dict!(event_attributes, "concept:name")
-    timestamp = pop_dict!(event_attributes, "time:timestamp")
-    id = pop_dict!(event_attributes, "identity:id")
-    instance = pop_dict!(event_attributes, "concept:instance")
-    transition = pop_dict!(event_attributes, "lifecycle:transition")
-    resource = pop_dict!(event_attributes, "org:resource")
-    role = pop_dict!(event_attributes, "org:role")
-    group = pop_dict!(event_attributes, "org:group")
+    name = pop_or_na!(event_attributes, "concept:name")
+    timestamp = pop_or_na!(event_attributes, "time:timestamp")
+    id = pop_or_na!(event_attributes, "identity:id")
+    instance = pop_or_na!(event_attributes, "concept:instance")
+    transition = pop_or_na!(event_attributes, "lifecycle:transition")
+    resource = pop_or_na!(event_attributes, "org:resource")
+    role = pop_or_na!(event_attributes, "org:role")
+    group = pop_or_na!(event_attributes, "org:group")
     event = Event(
         name, timestamp, id,
         instance, transition,
@@ -106,14 +106,12 @@ function create_event(event_node)
     return event
 end
 
-function pop_dict!(dict::Dict, key::String)
-    if key in keys(dict)
-        id = dict[key]
-        delete!(dict, key)
-    else
-        id = "NA"
+function pop_or_na!(dict::Dict, key::String)
+    try
+        return pop!(dict, key)
+    catch Exception
+        return "NA"
     end
-    return id
 end
 
 # TODO: add streaming option for large files
