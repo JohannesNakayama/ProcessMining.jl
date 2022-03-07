@@ -2,6 +2,7 @@ module ProcessMining
 
     import EzXML
     import DataFrames
+    # using Combinatorics  # for alphaminer
     # using AutoHashEquals
 
     const DEFAULT_NAMESPACE = "http://www.xes-standard.org/"

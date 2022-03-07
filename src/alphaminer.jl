@@ -26,9 +26,20 @@
 # end
 # ------------------------
 
+# TRADE-OFF:
+#   redundancy of computations vs. understandability of the code
+#   there are many "in-between" data structures that might be confusing
+#       if there were structs for them, but if we recompute them over and
+#       over, this might become a performance issue
+#   should be reevaluated when the algorithm works!
+# ------------------------
+
+
+
 
 using ProcessMining
 using Chain
+using Combinatorics
 
 
 # 1) GET RAW TRACES AND ACTIVITY SET FROM THE LOG
@@ -153,16 +164,37 @@ function ChoiceRelation(eventlog::EventLog)
 end
 
 
+function extract_start_activities(eventlog::EventLog)
+    activity_traces = extract_activity_traces(eventlog)
+    return unique([first(trace) for trace in activity_traces])
+end
 
 
-# function extract_start_activities(extracted_event_traces::AbstractArray)
-#     return unique([first(trace) for trace in extracted_event_traces])
-# end
+function extract_end_activities(eventlog::EventLog)
+    activity_traces = extract_activity_traces(eventlog)
+    return unique([last(trace) for trace in activity_traces])
+end
 
-# function extract_end_activities(extracted_event_traces::AbstractArray)
-#     return unique([last(trace) for trace in extracted_event_traces])
-# end
 
+function mine_all_place_pairs(eventlog::EventLog)
+    activity_traces = extract_activity_traces(eventlog)
+    activity_set = extract_activity_set(eventlog)
+    direct_succession = DirectSuccessionRelation(eventlog)
+    causality = CausalityRelation(eventlog)
+    parallel = ParallelRelation(eventlog)
+    choice = ChoiceRelation(eventlog)
+    # THIS WILL CERTAINLY NOT WORK (COMBINATORIC EXPLOSION)!
+    #   THERE HAS TO BE AN ITERATIVE WAY WITH A STOP CRITERIUM,
+    #   BUT A BETTER ONE THAN THE PREVIOUS APPROACH IMPLEMENTED
+    #   IN `iteratively_build_x`
+    # activity_powerset = powerset(activity_set, 1)
+    # place_set = Set()  # X_l
+    # for a in activity_powerset
+    #     for b in activity_powerset
+    #         print(a, b)
+    #     end
+    # end
+end
 
 
 # function iteratively_build_x(causality_relation, choice_relation)
