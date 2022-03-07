@@ -32,143 +32,206 @@ using Chain
 
 
 # 1) GET RAW TRACES AND ACTIVITY SET FROM THE LOG
-function extract_event_traces(eventlog::EventLog)
+# 2 + 3) SIMPLE STEPS: START AND END ACTIVITIES
+# 4a) EXTRACT RELATIONS FROM THE ACTIVITY LOG
+# 4b) GET SET X_L
+
+
+
+function extract_activity_traces(eventlog::EventLog)
     return [
         [event.name for event in trace.events]
         for trace in eventlog.traces
     ]
 end
 
-function extract_activity_set(extracted_event_traces::AbstractArray)
-    activity_set = @chain begin
-        extracted_event_traces
+function extract_activity_set(eventlog::EventLog)
+    return @chain begin
+        extract_activity_traces(eventlog)
         Iterators.flatten
         collect
         unique
     end
-    return activity_set
-end
-# ------------------------
-
-# 2 + 3) SIMPLE STEPS: START AND END ACTIVITIES
-function extract_start_activities(extracted_event_traces::AbstractArray)
-    return unique([first(trace) for trace in extracted_event_traces])
 end
 
-function extract_end_activities(extracted_event_traces::AbstractArray)
-    return unique([last(trace) for trace in extracted_event_traces])
-end
-# ------------------------
 
-# 4a) EXTRACT RELATIONS FROM THE ACTIVITY LOG
-function extract_direct_succession_relation(extracted_event_traces)
-    direct_succession_relation = Set(Tuple{String, String}[])
-    for trace in extracted_event_traces
+abstract type ActivityRelation end
+
+
+struct DirectSuccessionRelation <: ActivityRelation
+    pairs::Set{Tuple{String, String}}
+    function DirectSuccessionRelation(pairs::Set{Tuple{String, String}})
+        new(pairs)
+    end
+end
+
+
+function DirectSuccessionRelation()
+    return DirectSuccessionRelation(Set{Tuple{String, String}}())
+end
+
+
+function DirectSuccessionRelation(eventlog::EventLog)
+    activity_traces = extract_activity_traces(eventlog)
+    pairs = Set{Tuple{String, String}}()
+    for trace in activity_traces
         for i in 1:length(trace)
             if !(i == length(trace))
-                push!(direct_succession_relation, (trace[i], trace[i + 1]))
+                push!(pairs, (trace[i], trace[i + 1]))
             end
         end
     end
-    return direct_succession_relation
+    return DirectSuccessionRelation(pairs)
 end
 
-function extract_causality_relation(direct_succession_relation)
-    causality_relation = Set(Tuple{String, String}[])
-    for tup in direct_succession_relation
-        if !((tup[2], tup[1]) in direct_succession_relation)
-            push!(causality_relation, tup)
+
+struct CausalityRelation <: ActivityRelation
+    pairs::Set{Tuple{String, String}}
+    function CausalityRelation(pairs::Set{Tuple{String, String}})
+        new(pairs)
+    end
+end
+
+
+function CausalityRelation(direct_succession::DirectSuccessionRelation)
+    pairs = Set{Tuple{String, String}}()
+    for pair in direct_succession.pairs
+        if !((pair[2], pair[1]) in direct_succession.pairs)
+            push!(pairs, pair)
         end
     end
-    return causality_relation
+    return CausalityRelation(pairs)
 end
 
-function extract_parallel_relation(direct_succession_relation)
-    parallel_relation = Set(Tuple{String, String}[])
-    for tup in direct_succession_relation
-        if !(tup in parallel_relation) && ((tup[2], tup[1]) in direct_succession_relation)
-            push!(parallel_relation, tup)
-            push!(parallel_relation, (tup[2], tup[1]))
+
+function CausalityRelation(eventlog::EventLog)
+    direct_succession = DirectSuccessionRelation(eventlog)
+    return CausalityRelation(direct_succession)
+end
+
+
+struct ParallelRelation <: ActivityRelation
+    pairs::Set{Tuple{String, String}}
+    function ParallelRelation(pairs::Set{Tuple{String, String}})
+        new(pairs)
+    end
+end
+
+
+function ParallelRelation(direct_succession::DirectSuccessionRelation)
+    pairs = Set{Tuple{String, String}}()
+    for pair in direct_succession.pairs
+        if (pair[2], pair[1]) in direct_succession.pairs
+            push!(pairs, pair)
+            push!(pairs, (pair[2], pair[1]))
         end
     end
-    return parallel_relation
+    return ParallelRelation(pairs)
 end
 
-function extract_choice_relation(direct_succession_relation, activity_set)
+
+function ParallelRelation(eventlog::EventLog)
+    direct_succession = DirectSuccessionRelation(eventlog)
+    return ParallelRelation(direct_succession)
+end
+
+
+struct ChoiceRelation <: ActivityRelation
+    pairs::Set{Tuple{String, String}}
+    function ChoiceRelation(pairs::Set{Tuple{String, String}})
+        new(pairs)
+    end
+end
+
+
+function ChoiceRelation(eventlog::EventLog)
+    activity_set = extract_activity_set(eventlog)
+    direct_succession = DirectSuccessionRelation(eventlog)
     all_pairs = Set([(a, b) for a in activity_set for b in activity_set])
-    choice_relation = setdiff(all_pairs, direct_succession_relation)
-    return choice_relation
-end
-# ------------------------
-
-# 4b) GET SET X_L
-function iteratively_build_x(causality_relation, choice_relation)
-    place_pairs = get_initial_place_pairs(causality_relation)
-    while true
-        size = length(place_pairs)
-        build_place_pairs!(place_pairs, choice_relation, "forward")
-        build_place_pairs!(place_pairs, choice_relation, "backward")
-        new_size = length(place_pairs)
-        if size == new_size
-            break
-        end
-    end
-    return place_pairs
+    pairs = setdiff(all_pairs, direct_succession.pairs)
+    return ChoiceRelation(pairs)
 end
 
-function get_initial_place_pairs(causality_relation)
-    place_pairs = Set([])
-    for mapping in causality_relation
-        push!(place_pairs, (Set([mapping[1]]), Set([mapping[2]])))
-    end
-    return place_pairs
-end
 
-function build_place_pairs!(place_pairs, choice_relation, mode::String)
-    if mode == "forward"
-        a = 1
-        b = 2
-    elseif mode == "backward"
-        a = 2
-        b = 1
-    end
-    place_pairs_addition = Set([])
-    for p1 in place_pairs
-        for p2 in place_pairs
-            if p1 != p2 && (p1[a] == p2[a])
-                combinations = get_combinations(p1, p2, b)
-                flag = all_combinations_unrelated(combinations, choice_relation)
-                if flag && (mode == "forward")
-                    push!(place_pairs_addition, (p1[a], union(p1[b], p2[b])))
-                elseif flag && (mode == "backward")
-                    push!(place_pairs_addition, (union(p1[b], p2[b]), p1[a]))
-                end
-            end
-        end
-    end
-    union!(place_pairs, place_pairs_addition)
-    return place_pairs
-end
 
-function get_combinations(p1, p2, b)
-    combinations = []
-    for elem_p1 in collect(p1[b])
-        for elem_p2 in collect(p2[b])
-            push!(combinations, (elem_p1, elem_p2))
-        end
-    end
-    return combinations
-end
 
-function all_combinations_unrelated(combinations, choice_relation)
-    for comb in combinations
-        if !(comb in choice_relation)
-            return false
-        end
-    end
-    return true
-end
-# ------------------------
+# function extract_start_activities(extracted_event_traces::AbstractArray)
+#     return unique([first(trace) for trace in extracted_event_traces])
+# end
+
+# function extract_end_activities(extracted_event_traces::AbstractArray)
+#     return unique([last(trace) for trace in extracted_event_traces])
+# end
+
+
+
+# function iteratively_build_x(causality_relation, choice_relation)
+#     place_pairs = get_initial_place_pairs(causality_relation)
+#     while true
+#         size = length(place_pairs)
+#         build_place_pairs!(place_pairs, choice_relation, "forward")
+#         build_place_pairs!(place_pairs, choice_relation, "backward")
+#         new_size = length(place_pairs)
+#         if size == new_size
+#             break
+#         end
+#     end
+#     return place_pairs
+# end
+
+# function get_initial_place_pairs(causality_relation)
+#     place_pairs = Set([])
+#     for mapping in causality_relation
+#         push!(place_pairs, (Set([mapping[1]]), Set([mapping[2]])))
+#     end
+#     return place_pairs
+# end
+
+# function build_place_pairs!(place_pairs, choice_relation, mode::String)
+#     if mode == "forward"
+#         a = 1
+#         b = 2
+#     elseif mode == "backward"
+#         a = 2
+#         b = 1
+#     end
+#     place_pairs_addition = Set([])
+#     for p1 in place_pairs
+#         for p2 in place_pairs
+#             if p1 != p2 && (p1[a] == p2[a])
+#                 combinations = get_combinations(p1, p2, b)
+#                 flag = all_combinations_unrelated(combinations, choice_relation)
+#                 if flag && (mode == "forward")
+#                     push!(place_pairs_addition, (p1[a], union(p1[b], p2[b])))
+#                 elseif flag && (mode == "backward")
+#                     push!(place_pairs_addition, (union(p1[b], p2[b]), p1[a]))
+#                 end
+#             end
+#         end
+#     end
+#     union!(place_pairs, place_pairs_addition)
+#     return place_pairs
+# end
+
+# function get_combinations(p1, p2, b)
+#     combinations = []
+#     for elem_p1 in collect(p1[b])
+#         for elem_p2 in collect(p2[b])
+#             push!(combinations, (elem_p1, elem_p2))
+#         end
+#     end
+#     return combinations
+# end
+
+# function all_combinations_unrelated(combinations, choice_relation)
+#     for comb in combinations
+#         if !(comb in choice_relation)
+#             return false
+#         end
+#     end
+#     return true
+# end
+# # ------------------------
 
 
 # --------------------------- TESTING --------------------------- #
