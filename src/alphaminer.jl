@@ -28,20 +28,24 @@
 
 
 using ProcessMining
-using Pipe
+using Chain
+
 
 # 1) GET RAW TRACES AND ACTIVITY SET FROM THE LOG
 function extract_event_traces(eventlog::EventLog)
     return [
-        [event.name for event in trace.events] for trace in eventlog.traces
+        [event.name for event in trace.events]
+        for trace in eventlog.traces
     ]
 end
 
 function extract_activity_set(extracted_event_traces::AbstractArray)
-    activity_set = extracted_event_traces |>
-        Iterators.flatten |>
-        collect |>
+    activity_set = @chain begin
+        extracted_event_traces
+        Iterators.flatten
+        collect
         unique
+    end
     return activity_set
 end
 # ------------------------
@@ -168,16 +172,16 @@ end
 
 
 # --------------------------- TESTING --------------------------- #
-begin
-    EVENT_LOG_FILE = "road_fines.xes"  # alternative: Performance.xes
-    eventlog = read_xes(joinpath("data", EVENT_LOG_FILE))
-    extracted_event_traces = extract_event_traces(eventlog)
-    start_activities = extract_start_activities(extracted_event_traces)
-    end_activities = extract_end_activities(extracted_event_traces)
-    activity_set = extract_activity_set(extracted_event_traces)
-    direct_succession_relation = extract_direct_succession_relation(extracted_event_traces)
-    causality_relation = extract_causality_relation(direct_succession_relation)
-    parallel_relation = extract_parallel_relation(direct_succession_relation)
-    choice_relation = extract_choice_relation(direct_succession_relation, activity_set)
-    X = iteratively_build_x(causality_relation, choice_relation)
-end
+# begin
+#     EVENT_LOG_FILE = "road_fines.xes"  # alternative: Performance.xes
+#     eventlog = read_xes(joinpath("data", EVENT_LOG_FILE))
+#     extracted_event_traces = extract_event_traces(eventlog)
+#     start_activities = extract_start_activities(extracted_event_traces)
+#     end_activities = extract_end_activities(extracted_event_traces)
+#     activity_set = extract_activity_set(extracted_event_traces)
+#     direct_succession_relation = extract_direct_succession_relation(extracted_event_traces)
+#     causality_relation = extract_causality_relation(direct_succession_relation)
+#     parallel_relation = extract_parallel_relation(direct_succession_relation)
+#     choice_relation = extract_choice_relation(direct_succession_relation, activity_set)
+#     X = iteratively_build_x(causality_relation, choice_relation)
+# end
