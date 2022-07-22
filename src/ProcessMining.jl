@@ -23,6 +23,7 @@ module ProcessMining
     export fire_sequence
     export is_enabled
     export add_place!
+    export add_places!
     export add_transition!
 
 

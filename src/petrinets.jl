@@ -19,6 +19,9 @@ end
 Base.@kwdef mutable struct SimplePetriNet <: AbstractPetriNet
     places::Array{Place}
     transitions::Array{Transition}
+    function SimplePetriNet(places = Place[], transitions = Transition[])
+        new(places, transitions)
+    end
 end
 
 
@@ -73,6 +76,14 @@ function add_place!(model::AbstractPetriNet, marking::Int)
     return model
 end
 
+function add_places!(model, markings::Array{Int})
+    next_id = length(model.places) + 1
+    for (i, m) in enumerate(markings)
+        push!(model.places, Place(next_id, m))
+        next_id += 1
+    end
+    return model
+end
 
 function add_transition!(model::AbstractPetriNet, from::Array{Place}, to::Array{Place})
     push!(model.transitions, Transition(length(model.transitions) + 1, from, to))
