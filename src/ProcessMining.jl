@@ -26,12 +26,14 @@ module ProcessMining
     export add_transition!
     # export petrinet_to_dot
     # export write_dot
+    # export dfg_miner
 
     include("types.jl")
     include("petrinets.jl")
     include("io.jl")
     include("utilities.jl")
     include("algorithms.jl")
-    include("visualization.jl")
+    # include("visualization.jl")
+    # include("directly_follows_graph.jl")
 
 end

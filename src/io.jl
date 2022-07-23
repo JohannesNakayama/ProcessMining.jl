@@ -106,6 +106,7 @@ function create_event(event_node)
     return event
 end
 
+# TODO: this seem pretty bad
 function pop_or_na!(dict::Dict, key::String)
     try
         return pop!(dict, key)
