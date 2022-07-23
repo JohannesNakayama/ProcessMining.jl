@@ -1,57 +1,48 @@
-# input event log
-using Pkg
-Pkg.activate(".")
-using ProcessMining
-using Graphs
-using SimpleWeightedGraphs
-using Plots
-using GraphRecipes
-using Chain
-
-eventlog = read_xes("data/running-example.xes")
+mutable struct DirectlyFollowsGraph
+    graph::SimpleWeightedDiGraph
+    activity_map::AbstractDict
+end
 
 function dfg_miner(eventlog::EventLog)
-
-    directly_follows = Tuple[]
+    event_tuples = Tuple[]
+    activities = String[]
     for trace in eventlog.traces
-        activities = [e.name for e in trace.events]
+        trace_activities = [e.name for e in trace.events]
         trace_pairs = [
-            (activities[i], activities[i + 1])
-            for i in 1:(length(activities) - 1)
+            (trace_activities[i], trace_activities[i + 1])
+            for i in 1:(length(trace_activities) - 1)
         ]
-        append!(directly_follows, trace_pairs)
+        append!(event_tuples, deepcopy(trace_pairs))
+        unique!(append!(activities, deepcopy(trace_activities)))
     end
 
-    activity_set = @chain directly_follows begin
-        Iterators.flatten
-        collect
-        unique
+    activity_map = @chain activities begin
         enumerate
         collect
         Dict
         Dict(value => key for (key, value) in _)
     end
 
-    directly_follows_numeric = Tuple[]
-    for tup in directly_follows
+    event_tuples_numeric = Tuple[]
+    for tup in event_tuples
         push!(
-            directly_follows_numeric,
-            (activity_set[tup[1]], activity_set[tup[2]])
+            event_tuples_numeric,
+            (activity_map[tup[1]], activity_map[tup[2]])
         )
     end
 
-    g = SimpleWeightedDiGraph(length(activity_set))
-    for edge in directly_follows_numeric
-        if has_edge(g, edge[1], edge[2])
-            g.weights[edge[1], edge[2]] += 1
+    graph = SimpleWeightedDiGraph(length(activity_map))
+    for edge in event_tuples_numeric
+        if has_edge(graph, edge[1], edge[2])
+            graph.weights[edge[1], edge[2]] += 1
         else
-            add_edge!(g, edge[1], edge[2], 1)
+            add_edge!(graph, edge[1], edge[2], 1)
         end
     end
 
-    return g
+    return DirectlyFollowsGraph(graph, activity_map)
 end
 
-
-
+# for plotting
+# requires: Plots, GraphRecipes
 # graphplot(g, curves = false)
