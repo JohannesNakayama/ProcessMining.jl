@@ -7,7 +7,6 @@ module ProcessMining
 
     const DEFAULT_NAMESPACE = "http://www.xes-standard.org/"
 
-
     export Event
     export Trace
     export EventLog
@@ -25,12 +24,14 @@ module ProcessMining
     export add_place!
     export add_places!
     export add_transition!
-
+    # export petrinet_to_dot
+    # export write_dot
 
     include("types.jl")
     include("petrinets.jl")
     include("io.jl")
     include("utilities.jl")
     include("algorithms.jl")
+    include("visualization.jl")
 
 end

@@ -12,8 +12,6 @@ mutable struct Transition
     from::Array{Place}
     to::Array{Place}
 end
-# TODO: do we need auto_hash_equals? -> @auto_hash_equals
-#       decide later
 
 
 Base.@kwdef mutable struct SimplePetriNet <: AbstractPetriNet

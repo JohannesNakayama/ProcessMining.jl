@@ -6,9 +6,14 @@
 /dev/
 /docs/build/
 /docs/site/
+
 *.csv
 *.xes
 *.xes.gz
 /data/
 TODO.md
 testing.jl
+*.png
+*.svg
+*.dot
+/output/
