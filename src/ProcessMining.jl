@@ -4,9 +4,8 @@ module ProcessMining
     import DataFrames
     using Graphs
     using MetaGraphs
-    # using SimpleWeightedGraphs
     using Chain
-    # using Combinatorics  # for alphaminer
+    using Combinatorics
     # using AutoHashEquals
 
     const DEFAULT_NAMESPACE = "http://www.xes-standard.org/"
@@ -41,6 +40,7 @@ module ProcessMining
     include("utilities.jl")
     include("algorithms.jl")
     include("directly_follows_graph.jl")
+    include("alphaminer.jl")
     include("visualization.jl")
 
 end

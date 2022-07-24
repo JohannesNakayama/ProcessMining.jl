@@ -110,7 +110,6 @@ function add_transition!(model::AbstractPetriNet, from::Int, to::Int)
 end
 
 
-
 # ----- MORE IDEAS ----- #
 # reachability graph
 # boundedness
