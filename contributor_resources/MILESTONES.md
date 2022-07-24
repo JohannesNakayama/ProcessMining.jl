@@ -41,7 +41,7 @@ It will take some time until this package will be usable for professional use ca
 
 :red_circle: All functions of the user-facing API are documented with doc strings in the code. Furthermore, an online documentation page is set up and available on the project github page.
 
-:red_circle: Alpha Miner works: The Alpha algorithm is implemented and works reliably. A workflow that gets the user from a XES event log to a workflow net should be established.
+:yellow_circle: Alpha Miner works: The Alpha algorithm is implemented and works reliably. A workflow that gets the user from a XES event log to a workflow net should be established.
 
 :red_circle: Educational materials with examples are set up (maybe part of the documentation, or--alternatively--as scripts within the repository). [Pluto.jl](https://github.com/fonsp/Pluto.jl) looks promising for this. 
 
