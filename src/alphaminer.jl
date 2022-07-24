@@ -18,14 +18,6 @@
 
 # ------------------------
 
-# MAYBE NOT NEEDED
-# mutable struct Footprint{T}
-#     colnames::Array{T}
-#     rownames::Array{T}
-#     relation::Matrix{Symbol}
-# end
-# ------------------------
-
 # TRADE-OFF:
 #   redundancy of computations vs. understandability of the code
 #   there are many "in-between" data structures that might be confusing
@@ -33,8 +25,6 @@
 #       over, this might become a performance issue
 #   should be reevaluated when the algorithm works!
 # ------------------------
-
-
 
 
 using ProcessMining
@@ -48,17 +38,17 @@ using Combinatorics
 # 4b) GET SET X_L
 
 
-
-function extract_activity_traces(eventlog::EventLog)
+function get_raw_traces(eventlog::EventLog)
     return [
         [event.name for event in trace.events]
         for trace in eventlog.traces
     ]
 end
 
-function extract_activity_set(eventlog::EventLog)
-    return @chain begin
-        extract_activity_traces(eventlog)
+
+function get_activities(eventlog::EventLog)
+    return @chain eventlog begin
+        get_raw_traces
         Iterators.flatten
         collect
         unique
@@ -66,101 +56,56 @@ function extract_activity_set(eventlog::EventLog)
 end
 
 
-abstract type ActivityRelation end
-
-
-struct DirectSuccessionRelation <: ActivityRelation
-    pairs::Set{Tuple{String, String}}
-    function DirectSuccessionRelation(pairs::Set{Tuple{String, String}})
-        new(pairs)
-    end
-end
-
-
-function DirectSuccessionRelation()
-    return DirectSuccessionRelation(Set{Tuple{String, String}}())
-end
-
-
-function DirectSuccessionRelation(eventlog::EventLog)
-    activity_traces = extract_activity_traces(eventlog)
+function get_direct_succession_relation(eventlog::EventLog)
+    traces = get_raw_traces(eventlog)
     pairs = Set{Tuple{String, String}}()
-    for trace in activity_traces
+    for trace in traces
         for i in 1:length(trace)
             if !(i == length(trace))
                 push!(pairs, (trace[i], trace[i + 1]))
             end
         end
     end
-    return DirectSuccessionRelation(pairs)
+    return pairs
 end
 
 
-struct CausalityRelation <: ActivityRelation
-    pairs::Set{Tuple{String, String}}
-    function CausalityRelation(pairs::Set{Tuple{String, String}})
-        new(pairs)
-    end
-end
-
-
-function CausalityRelation(direct_succession::DirectSuccessionRelation)
+function get_causality_relation(eventlog::EventLog)
+    direct_succession = get_direct_succession_relation(eventlog)
     pairs = Set{Tuple{String, String}}()
-    for pair in direct_succession.pairs
-        if !((pair[2], pair[1]) in direct_succession.pairs)
+    for pair in direct_succession
+        if !(reverse(pair) in direct_succession)
             push!(pairs, pair)
         end
     end
-    return CausalityRelation(pairs)
+    return pairs
 end
 
 
-function CausalityRelation(eventlog::EventLog)
-    direct_succession = DirectSuccessionRelation(eventlog)
-    return CausalityRelation(direct_succession)
-end
-
-
-struct ParallelRelation <: ActivityRelation
-    pairs::Set{Tuple{String, String}}
-    function ParallelRelation(pairs::Set{Tuple{String, String}})
-        new(pairs)
-    end
-end
-
-
-function ParallelRelation(direct_succession::DirectSuccessionRelation)
+function get_parallel_relation(eventlog::EventLog)
+    direct_succession = get_direct_succession_relation(eventlog)
     pairs = Set{Tuple{String, String}}()
-    for pair in direct_succession.pairs
-        if (pair[2], pair[1]) in direct_succession.pairs
+    for pair in direct_succession
+        if reverse(pair) in direct_succession
             push!(pairs, pair)
-            push!(pairs, (pair[2], pair[1]))
+            push!(pairs, reverse(pair))
         end
     end
-    return ParallelRelation(pairs)
+    return pairs
 end
 
 
-function ParallelRelation(eventlog::EventLog)
-    direct_succession = DirectSuccessionRelation(eventlog)
-    return ParallelRelation(direct_succession)
-end
-
-
-struct ChoiceRelation <: ActivityRelation
-    pairs::Set{Tuple{String, String}}
-    function ChoiceRelation(pairs::Set{Tuple{String, String}})
-        new(pairs)
+function get_choice_relation(eventlog::EventLog)
+    activities = get_activities(eventlog)
+    direct_succession = get_direct_succession_relation(eventlog)
+    choice_complement = Set{Tuple{String, String}}()
+    for d in direct_succession
+        push!(choice_complement, d)
+        push!(choice_complement, reverse(d))
     end
-end
-
-
-function ChoiceRelation(eventlog::EventLog)
-    activity_set = extract_activity_set(eventlog)
-    direct_succession = DirectSuccessionRelation(eventlog)
-    all_pairs = Set([(a, b) for a in activity_set for b in activity_set])
-    pairs = setdiff(all_pairs, direct_succession.pairs)
-    return ChoiceRelation(pairs)
+    allpairs = Set([(a, b) for a in activities for b in activities])
+    pairs = setdiff(allpairs, choice_complement)
+    return pairs
 end
 
 
@@ -174,6 +119,11 @@ function extract_end_activities(eventlog::EventLog)
     activity_traces = extract_activity_traces(eventlog)
     return unique([last(trace) for trace in activity_traces])
 end
+
+
+
+
+
 
 
 function mine_all_place_pairs(eventlog::EventLog)
