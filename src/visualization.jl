@@ -48,6 +48,42 @@ function petrinet_to_dot(pn::AbstractPetriNet, graphname::String)
 
 end
 
+function dfg_to_dot(dfg::DirectlyFollowsGraph, graphname::String)
+
+    graph = []
+    push!(graph, "digraph")
+    push!(graph, graphname)
+
+    push!(graph, "{")
+    push!(graph, "rankdir=\"LR\";")
+    push!(graph, "node [shape=circle]")
+
+    for v in vertices(dfg.graph)
+        push!(graph, "\"" * dfg.activity_map[v] * "\"" * "; ")
+    end
+
+    for e in edges(dfg.graph)
+        push!(
+            graph,
+            "\""
+            * dfg.activity_map[src(e)]
+            * "\""
+            * " -> "
+            * "\""
+            * dfg.activity_map[dst(e)]
+            * "\""
+            * "; "
+        )
+    end
+
+    push!(graph, "}")
+
+    g = join(graph, " ")
+
+    return g
+end
+
+
 function write_dot(dot_graph::String, filename::String)
     open(filename, "w") do io
         write(io, dot_graph)

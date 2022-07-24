@@ -3,7 +3,8 @@ module ProcessMining
     import EzXML
     import DataFrames
     using Graphs
-    using SimpleWeightedGraphs
+    using MetaGraphs
+    # using SimpleWeightedGraphs
     using Chain
     # using Combinatorics  # for alphaminer
     # using AutoHashEquals
@@ -27,17 +28,19 @@ module ProcessMining
     export add_place!
     export add_places!
     export add_transition!
-    # export petrinet_to_dot
-    # export write_dot
+    export petrinet_to_dot
+    export write_dot
     export DirectlyFollowsGraph
     export dfg_miner
+    export prune_dfg!
+    export dfg_to_dot
 
     include("types.jl")
     include("petrinets.jl")
     include("io.jl")
     include("utilities.jl")
     include("algorithms.jl")
-    # include("visualization.jl")
     include("directly_follows_graph.jl")
+    include("visualization.jl")
 
 end

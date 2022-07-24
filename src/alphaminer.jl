@@ -266,17 +266,20 @@ end
 # # ------------------------
 
 
+
 # --------------------------- TESTING --------------------------- #
-# begin
-#     EVENT_LOG_FILE = "road_fines.xes"  # alternative: Performance.xes
-#     eventlog = read_xes(joinpath("data", EVENT_LOG_FILE))
-#     extracted_event_traces = extract_event_traces(eventlog)
-#     start_activities = extract_start_activities(extracted_event_traces)
-#     end_activities = extract_end_activities(extracted_event_traces)
-#     activity_set = extract_activity_set(extracted_event_traces)
-#     direct_succession_relation = extract_direct_succession_relation(extracted_event_traces)
-#     causality_relation = extract_causality_relation(direct_succession_relation)
-#     parallel_relation = extract_parallel_relation(direct_succession_relation)
-#     choice_relation = extract_choice_relation(direct_succession_relation, activity_set)
-#     X = iteratively_build_x(causality_relation, choice_relation)
-# end
+begin
+    eventlog = read_xes(joinpath("data", "running-example.xes"))
+    extracted_activity_traces = extract_activity_traces(eventlog)
+    start_activities = extract_start_activities(eventlog)
+    end_activities = extract_end_activities(eventlog)
+    activity_set = extract_activity_set(eventlog)
+
+    all_pairs_iterator = Iterators.product(activity_set, activity_set)
+
+    direct_succession_relation = extract_direct_succession_relation(extracted_activity_traces)
+    causality_relation = extract_causality_relation(direct_succession_relation)
+    parallel_relation = extract_parallel_relation(direct_succession_relation)
+    choice_relation = extract_choice_relation(direct_succession_relation, activity_set)
+    X = iteratively_build_x(causality_relation, choice_relation)
+end

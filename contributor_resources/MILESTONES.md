@@ -1,6 +1,6 @@
-# :checkered_flag: Milestones for 2021 :checkered_flag:
+# :checkered_flag: Milestones :checkered_flag:
 
-This document outlines the next milestones for this project that I hope will be reachable in 2021. I attempted to be as concise as possible and to formulate goals that will allow us to check off milestones as we go. 
+This document outlines the next milestones for this project. I attempted to be as concise as possible and to formulate goals that will allow us to check off milestones as we go. 
 
 
 
@@ -21,7 +21,7 @@ As a proof of concept, for milestone 1, ProcessMining.jl should be able to provi
 
 :yellow_circle: CI/CD is set up with Travis CI and Appveyor. 
 
-:red_circle: Implementation of pruned directly-follows graphs: DFGs can be inferred from event logs and interactively pruned. 
+:yellow_circle: Implementation of pruned directly-follows graphs: DFGs can be inferred from event logs and interactively pruned. 
 
 
 

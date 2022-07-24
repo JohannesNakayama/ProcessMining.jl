@@ -13,6 +13,7 @@
 /data/
 TODO.md
 testing.jl
+convert_dot.sh
 *.png
 *.svg
 *.dot
