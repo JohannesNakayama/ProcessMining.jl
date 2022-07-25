@@ -3,12 +3,14 @@ abstract type AbstractPetriNet end
 
 mutable struct Place
     id::Int
+    name::String
     marking::Int
 end
 
 
 mutable struct Transition
     id::Int
+    name::String
     from::Array{Place}
     to::Array{Place}
 end
@@ -30,6 +32,51 @@ Base.@kwdef mutable struct WorkflowNet <: AbstractPetriNet
     transitions::Array{Transition}
 end
 
+
+function add_place!(
+    model::AbstractPetriNet;
+    name::String="default",
+    marking::Int=0
+)
+    new_place_id = length(model.places) + 1
+    push!(model.places, Place(new_place_id, name, marking))
+    return model
+end
+
+
+function add_transition!(
+    model::AbstractPetriNet,
+    from::Array{Place},
+    to::Array{Place};
+    name::String="default"
+)
+    push!(
+        model.transitions,
+        Transition(length(model.transitions) + 1, name, from, to)
+    )
+    return model
+end
+
+
+function add_transition!(
+    model::AbstractPetriNet,
+    from::Array{Int},
+    to::Array{Int};
+    name::String="default"
+)
+    predecessors = [p for p in model.places if p.id in from]
+    successors = [p for p in model.places if p.id in to]
+    push!(
+        model.transitions,
+        Transition(
+            length(model.transitions) + 1,
+            name,
+            predecessors,
+            successors
+        )
+    )
+    return model
+end
 
 function fire!(model::AbstractPetriNet, transition_id::Int)
     if is_enabled(model, transition_id)
@@ -68,46 +115,6 @@ function is_enabled(model::AbstractPetriNet, transition_id::Int)
 end
 
 
-function add_place!(model::AbstractPetriNet, marking::Int)
-    new_place_id = length(model.places) + 1
-    push!(model.places, Place(new_place_id, marking))
-    return model
-end
-
-function add_places!(model, markings::Array{Int})
-    next_id = length(model.places) + 1
-    for (i, m) in enumerate(markings)
-        push!(model.places, Place(next_id, m))
-        next_id += 1
-    end
-    return model
-end
-
-function add_transition!(model::AbstractPetriNet, from::Array{Place}, to::Array{Place})
-    push!(model.transitions, Transition(length(model.transitions) + 1, from, to))
-    return model
-end
-
-
-function add_transition!(model::AbstractPetriNet, from::Array{Int}, to::Array{Int})
-    predecessors = [p for p in model.places if p.id in from]
-    successors = [p for p in model.places if p.id in to]
-    push!(
-        model.transitions,
-        Transition(length(model.transitions) + 1, predecessors, successors)
-    )
-end
-
-
-function add_transition!(model::AbstractPetriNet, from::Int, to::Int)
-    predecessor = model.places[from]
-    successor = model.places[to]
-    push!(
-        model.transitions,
-        Transition(length(model.transitions) + 1, [predecessor], [successor])
-    )
-    return model
-end
 
 
 # ----- MORE IDEAS ----- #

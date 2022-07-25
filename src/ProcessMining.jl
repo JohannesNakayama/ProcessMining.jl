@@ -25,7 +25,6 @@ module ProcessMining
     export fire_sequence
     export is_enabled
     export add_place!
-    export add_places!
     export add_transition!
     export petrinet_to_dot
     export write_dot
@@ -33,6 +32,7 @@ module ProcessMining
     export dfg_miner
     export prune_dfg!
     export dfg_to_dot
+    export alpha_miner
 
     include("types.jl")
     include("petrinets.jl")
