@@ -6,6 +6,7 @@ module ProcessMining
     using MetaGraphs
     using Chain
     using Combinatorics
+    using ProgressMeter
 
     const DEFAULT_NAMESPACE = "http://www.xes-standard.org/"
 

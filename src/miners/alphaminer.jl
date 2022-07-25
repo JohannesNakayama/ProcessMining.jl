@@ -38,7 +38,7 @@ function alpha_miner(eventlog::EventLog)
 
     # extract place pairs
     x_l = []
-    for (i, c) in enumerate(combs)
+    @showprogress "Alpha Miner..." for (i, c) in enumerate(combs)
         if (
             valid_within(c[1], choice)
             & valid_within(c[2], choice)
@@ -94,6 +94,7 @@ function alpha_miner(eventlog::EventLog)
 
     return pn
 end
+
 
 function get_raw_traces(eventlog::EventLog)
     return [
