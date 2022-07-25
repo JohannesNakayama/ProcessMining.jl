@@ -25,6 +25,25 @@ Base.@kwdef mutable struct PetriNet <: AbstractPetriNet
 end
 
 
+function Base.show(io::IO, ::MIME"text/plain", place::Place)
+    print("Place \"$(place.name)\", with ID $(place.id)")
+end
+
+
+function Base.show(io::IO, ::MIME"text/plain", transition::Transition)
+    print("Transition \"$(transition.name)\", with ID $(transition.id)")
+end
+
+
+function Base.show(io::IO, ::MIME"text/plain", petrinet::PetriNet)
+    print(
+        "Petri net with "
+        * "$(length(petrinet.places)) places and "
+        * "$(length(petrinet.transitions)) transitions"
+    )
+end
+
+
 function add_place!(
     model::AbstractPetriNet;
     name::String="default",
