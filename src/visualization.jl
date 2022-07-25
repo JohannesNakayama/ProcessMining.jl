@@ -2,9 +2,7 @@
 # improve later
 # just for quick look at results
 
-
-
-function petrinet_to_dot(pn::AbstractPetriNet, graphname::String="mywfn")
+function to_dot(pn::AbstractPetriNet; graphname::String="default")
     place_list = [string(place.id) for place in pn.places]
     if pn.transitions[1].name != "default"
         transition_list = ["\"" * t.name * "\"" for t in pn.transitions]
@@ -59,11 +57,10 @@ function petrinet_to_dot(pn::AbstractPetriNet, graphname::String="mywfn")
     g = join(graph, " ")
 
     return g
-
 end
 
-function dfg_to_dot(dfg::DirectlyFollowsGraph, graphname::String)
 
+function to_dot(dfg::DirectlyFollowsGraph; graphname::String="default")
     graph = []
     push!(graph, "digraph")
     push!(graph, graphname)
@@ -77,6 +74,7 @@ function dfg_to_dot(dfg::DirectlyFollowsGraph, graphname::String)
     end
 
     for e in edges(dfg.graph)
+        weight = get_prop(dfg.graph, e, :weight)
         push!(
             graph,
             "\""
@@ -86,6 +84,9 @@ function dfg_to_dot(dfg::DirectlyFollowsGraph, graphname::String)
             * "\""
             * dfg.activity_map[dst(e)]
             * "\""
+            * "[penwidth="
+            * string(weight)
+            * "]"
             * "; "
         )
     end

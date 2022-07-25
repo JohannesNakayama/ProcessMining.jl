@@ -1,8 +1,3 @@
-mutable struct DirectlyFollowsGraph
-    graph::MetaDiGraph
-    activity_map::AbstractDict
-end
-
 function dfg_miner(eventlog::EventLog)
     event_tuples = Tuple[]
     activities = String[]

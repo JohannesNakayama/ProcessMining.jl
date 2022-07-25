@@ -6,7 +6,6 @@ module ProcessMining
     using MetaGraphs
     using Chain
     using Combinatorics
-    # using AutoHashEquals
 
     const DEFAULT_NAMESPACE = "http://www.xes-standard.org/"
 
@@ -14,33 +13,36 @@ module ProcessMining
     export Trace
     export EventLog
     export read_xes
+
     export info
     export length
-    export SimplePetriNet
-    export WorkflowNet
+
+    export PetriNet
     export Transition
     export Place
+    export add_place!
+    export add_transition!
     export fire!
     export fire
     export fire_sequence
     export is_enabled
-    export add_place!
-    export add_transition!
-    export petrinet_to_dot
+
+    export to_dot
     export write_dot
+
     export DirectlyFollowsGraph
     export dfg_miner
     export prune_dfg!
-    export dfg_to_dot
+
     export alpha_miner
 
-    include("types.jl")
-    include("petrinets.jl")
-    include("io.jl")
+    include("io/eventlog.jl")
+    include("io/io.jl")
+    include("process-models/petrinet.jl")
+    include("process-models/dfg.jl")
     include("utilities.jl")
-    include("algorithms.jl")
-    include("directly_follows_graph.jl")
-    include("alphaminer.jl")
+    include("miners/dfgminer.jl")
+    include("miners/alphaminer.jl")
     include("visualization.jl")
 
 end

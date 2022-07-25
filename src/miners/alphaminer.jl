@@ -67,7 +67,7 @@ function alpha_miner(eventlog::EventLog)
         Dict
     end
 
-    pn = SimplePetriNet()
+    pn = PetriNet()
 
     for i in 1:length(activities)
         add_transition!(pn, Place[], Place[], name = activities[i])

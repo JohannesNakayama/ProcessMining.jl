@@ -16,20 +16,12 @@ mutable struct Transition
 end
 
 
-Base.@kwdef mutable struct SimplePetriNet <: AbstractPetriNet
+Base.@kwdef mutable struct PetriNet <: AbstractPetriNet
     places::Array{Place}
     transitions::Array{Transition}
-    function SimplePetriNet(places = Place[], transitions = Transition[])
+    function PetriNet(places = Place[], transitions = Transition[])
         new(places, transitions)
     end
-end
-
-
-Base.@kwdef mutable struct WorkflowNet <: AbstractPetriNet
-    source::Int
-    sink::Int
-    places::Array{Place}
-    transitions::Array{Transition}
 end
 
 
@@ -77,6 +69,7 @@ function add_transition!(
     )
     return model
 end
+
 
 function fire!(model::AbstractPetriNet, transition_id::Int)
     if is_enabled(model, transition_id)
