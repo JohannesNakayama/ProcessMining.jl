@@ -39,11 +39,11 @@ module ProcessMining
 
     include("io/eventlog.jl")
     include("io/io.jl")
-    include("process-models/petrinet.jl")
-    include("process-models/dfg.jl")
+    include("process_models/petrinet.jl")
+    include("process_models/dfg.jl")
     include("utilities.jl")
-    include("miners/dfgminer.jl")
-    include("miners/alphaminer.jl")
+    include("miners/dfg_miner.jl")
+    include("miners/alpha_miner.jl")
     include("visualization.jl")
 
 end

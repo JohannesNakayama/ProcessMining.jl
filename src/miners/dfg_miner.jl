@@ -1,3 +1,4 @@
+# TODO: refactor
 function dfg_miner(eventlog::EventLog)
     event_tuples = Tuple[]
     activities = String[]
