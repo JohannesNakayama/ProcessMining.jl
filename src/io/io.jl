@@ -75,7 +75,7 @@ function extract_traces(xml_doc::EzXML.Document)
     ns = get_namespace(xml_doc)
     xpath_expr = "./ns:trace"
     trace_nodes = EzXML.findall(xpath_expr, xml_doc.root, ["ns"=>ns])
-    traces = [create_trace(t, ns) for t in trace_nodes]
+    traces = sort([create_trace(t, ns) for t in trace_nodes])
     return traces
 end
 

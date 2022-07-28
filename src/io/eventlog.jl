@@ -1,3 +1,8 @@
+"""
+    Event
+
+An `Event` that can be part of a `Trace` in an `EventLog`.
+"""
 mutable struct Event
     name::String
     timestamp::String
@@ -11,6 +16,11 @@ mutable struct Event
 end
 
 
+"""
+    Trace
+
+A `Trace` in an `EventLog` containing `Event`s.
+"""
 mutable struct Trace
     name::String
     id::Union{Int, AbstractString}
@@ -19,6 +29,11 @@ mutable struct Trace
 end
 
 
+"""
+    EventLog
+
+An `EventLog` containing `Trace`s with `Event`s.
+"""
 mutable struct EventLog
     traces::Array{Trace}
     event_classifiers::Dict{Any, Any}
@@ -38,3 +53,6 @@ end
 function Base.show(io::IO, ::MIME"text/plain", eventlog::EventLog)
     print("EventLog with $(length(eventlog.traces)) traces")
 end
+
+
+Base.isless(t1::Trace, t2::Trace) = t1.name < t2.name

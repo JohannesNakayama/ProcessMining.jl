@@ -1,14 +1,29 @@
+"""
+    AbstractPetriNet
+
+An abstract type for all concrete types of Petri nets (e.g. Workflow nets).
+"""
 abstract type AbstractPetriNet end
 
 
-mutable struct Place
+"""
+    Place
+
+A `Place` in any concrete type below `AbstractPetriNet`.
+"""
+Base.@kwdef mutable struct Place
     id::Int
     name::String
     marking::Int
 end
 
 
-mutable struct Transition
+"""
+    Transition
+
+A `Transition` in any concrete type below `AbstractPetriNet`.
+"""
+Base.@kwdef mutable struct Transition
     id::Int
     name::String
     from::Array{Place}
@@ -16,6 +31,11 @@ mutable struct Transition
 end
 
 
+"""
+    PetriNet
+
+A concrete implementation of standard Petri nets.
+"""
 Base.@kwdef mutable struct PetriNet <: AbstractPetriNet
     places::Array{Place}
     transitions::Array{Transition}
@@ -44,6 +64,14 @@ function Base.show(io::IO, ::MIME"text/plain", petrinet::PetriNet)
 end
 
 
+"""
+    add_place!(model::AbstractPetriNet; name::String="default", marking::Int=0)
+
+Add a `Place` to any concrete type under `AbstractPetriNet`.
+
+A `name` and an initial `marking` can be supplied.
+Default values are `name="default"` and `marking=0`.
+"""
 function add_place!(
     model::AbstractPetriNet;
     name::String="default",
@@ -55,6 +83,15 @@ function add_place!(
 end
 
 
+"""
+    add_transition!(model::AbstractPetriNet, from::Array{Place}, to::Array{Place}; name::String="default")
+
+Add a `Transition` to any concrete type under `AbstractPetriNet`.
+
+Supply `Place` arrays to `from` and `to` to add a `Transition` with arrows from the places in `from` to the places in `to`.
+A name can be supplied optionally.
+An id is auto-generated based on the supplied Petri net.
+"""
 function add_transition!(
     model::AbstractPetriNet,
     from::Array{Place},
@@ -69,6 +106,14 @@ function add_transition!(
 end
 
 
+"""
+    add_transition!(model::AbstractPetriNet, from::Array{Int}, to::Array{Int}; name::String="default")
+
+Add a `Transition` to any concrete type under `AbstractPetriNet`.
+
+This is a convenience dispatch of `add_transition!` that takes `Int` arrays as `from` and `to` arguments.
+`Place`s have `Int` ids, so they can easily be referenced numerically when creating `Transition`s.
+"""
 function add_transition!(
     model::AbstractPetriNet,
     from::Array{Int},
@@ -90,6 +135,13 @@ function add_transition!(
 end
 
 
+"""
+    fire!(model::AbstractPetriNet, transition_id::Int)
+
+Fire a transition in any concrete implementation of `AbstractPetriNet`.
+
+The `fire!` function modifies the `AbstractPetriNet`, in that it consumes tokens (markings) from the `Place`s before the `Transition` and produces tokens in the `Place`s after the `Transition`.
+"""
 function fire!(model::AbstractPetriNet, transition_id::Int)
     if is_enabled(model, transition_id)
         for f in model.transitions[transition_id].from
@@ -105,6 +157,13 @@ function fire!(model::AbstractPetriNet, transition_id::Int)
 end
 
 
+"""
+    fire(model::AbstractPetriNet, transition_id::Int)
+
+Return a copy of the supplied Petri net where the `Transition` with `id = transition_id` has been fired.
+
+Behaves the same as the `fire!` function, but returns a copy of the supplied Petri net and doesn't change the model in-place.
+"""
 function fire(model::AbstractPetriNet, transition_id::Int)
     updated_model = deepcopy(model)
     fire!(updated_model, transition_id)
@@ -112,6 +171,12 @@ function fire(model::AbstractPetriNet, transition_id::Int)
 end
 
 
+"""
+    fire_sequence(model::AbstractPetriNet, sequence::Array{Int})
+    
+Fire a sequence of `Transition`s in a supplied model of type <: AbstractPetriNet.
+The sequence of `Transition`s is supplied as an `Int` array.
+"""
 function fire_sequence(model::AbstractPetriNet, sequence::Array{Int})
     output_model = deepcopy(model)
     for t in sequence
@@ -121,6 +186,13 @@ function fire_sequence(model::AbstractPetriNet, sequence::Array{Int})
 end
 
 
+"""
+    is_enabled(model::AbstractPetriNet, transition_id::Int)
+
+Return if a given `Transition` in a model <: `AbstractPetriNet` is enabled.
+
+A transition is enabled if it can be fired, meaning all `Place`s with arrows to the transition have at least one token.
+"""
 function is_enabled(model::AbstractPetriNet, transition_id::Int)
     transition = model.transitions[transition_id]
     return reduce(&, [(place.marking >= 1) for place in transition.from])
