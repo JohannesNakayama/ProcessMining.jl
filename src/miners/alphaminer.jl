@@ -18,7 +18,6 @@
 #   should be reevaluated when the algorithm works!
 # ------------------------
 
-# TODO: doesn't scale -> optimize
 function alpha_miner(eventlog::EventLog)
 
     # preparations
@@ -33,17 +32,17 @@ function alpha_miner(eventlog::EventLog)
     end_activities = get_end_activities(eventlog)
 
     # iterators
-    powset = collect(powerset(activities, 1))
+    powset = [
+        elem
+        for elem in collect(powerset(activities, 1))
+        if valid_within(elem, choice)
+    ]
     combs = with_replacement_combinations(powset, 2)
 
     # extract place pairs
     x_l = []
     @showprogress "Alpha Miner..." for (i, c) in enumerate(combs)
-        if (
-            valid_within(c[1], choice)
-            & valid_within(c[2], choice)
-            & valid_between(c, causality)
-        )
+        if valid_between(c, causality)
             push!(x_l, c)
         end
     end
