@@ -18,7 +18,7 @@
 #   should be reevaluated when the algorithm works!
 # ------------------------
 
-
+# TODO: doesn't scale -> optimize
 function alpha_miner(eventlog::EventLog)
 
     # preparations
