@@ -18,6 +18,15 @@
 #   should be reevaluated when the algorithm works!
 # ------------------------
 
+# TODO: improve documentation
+
+"""
+    alpha_miner(eventlog::EventLog)
+
+Perform the alpha miner algorithm on a given `EventLog`.
+
+The return value is a `PetriNet`.
+"""
 function alpha_miner(eventlog::EventLog)
 
     # preparations
@@ -32,12 +41,12 @@ function alpha_miner(eventlog::EventLog)
     end_activities = get_end_activities(eventlog)
 
     # iterators
-    powset = [
+    reduced_powset = [
         elem
         for elem in collect(powerset(activities, 1))
         if valid_within(elem, choice)
     ]
-    combs = with_replacement_combinations(powset, 2)
+    combs = with_replacement_combinations(reduced_powset, 2)
 
     # extract place pairs
     x_l = []
@@ -95,6 +104,14 @@ function alpha_miner(eventlog::EventLog)
 end
 
 
+"""
+    get_raw_traces(eventlog::EventLog)
+
+Get `Trace`s of a given `EventLog` as string arrays.
+
+It is not always useful to have traces as `Event[]` objects.
+In some cases, it is useful to just have the raw string representation, where each event in a trace is represented by its name as a string.
+"""
 function get_raw_traces(eventlog::EventLog)
     return [
         [event.name for event in trace.events]
@@ -103,6 +120,11 @@ function get_raw_traces(eventlog::EventLog)
 end
 
 
+"""
+    get_activities(eventlog::EventLog)
+
+Get all unique activities in an `EventLog`.
+"""
 function get_activities(eventlog::EventLog)
     return @chain eventlog begin
         get_raw_traces
@@ -113,6 +135,13 @@ function get_activities(eventlog::EventLog)
 end
 
 
+"""
+    get_direct_succession_relation(eventlog::EventLog)
+
+Get the direct succession relation from a given `EventLog`.
+
+A tuple of events (a, b) is defined to be in the direct succession relation if a trace exists, where b directly follows a.
+"""
 function get_direct_succession_relation(eventlog::EventLog)
     traces = get_raw_traces(eventlog)
     pairs = Set{Tuple{String, String}}()
@@ -127,6 +156,11 @@ function get_direct_succession_relation(eventlog::EventLog)
 end
 
 
+"""
+    get_causality_relation(eventlog::EventLog)
+
+Get the causality relation from a given `EventLog`.
+"""
 function get_causality_relation(eventlog::EventLog)
     direct_succession = get_direct_succession_relation(eventlog)
     pairs = Set{Tuple{String, String}}()
@@ -139,6 +173,11 @@ function get_causality_relation(eventlog::EventLog)
 end
 
 
+"""
+    get_parallel_relation(eventlog::EventLog)
+
+Get the parallel relation from a given `EventLog`.
+"""
 function get_parallel_relation(eventlog::EventLog)
     direct_succession = get_direct_succession_relation(eventlog)
     pairs = Set{Tuple{String, String}}()
@@ -152,6 +191,11 @@ function get_parallel_relation(eventlog::EventLog)
 end
 
 
+"""
+    get_choice_relation(eventlog::EventLog)
+
+Get the choice relation from a given `EventLog`.
+"""
 function get_choice_relation(eventlog::EventLog)
     activities = get_activities(eventlog)
     direct_succession = get_direct_succession_relation(eventlog)
@@ -166,18 +210,35 @@ function get_choice_relation(eventlog::EventLog)
 end
 
 
+"""
+    get_start_activities(eventlog::EventLog)
+
+Get the set of start activities from a given `EventLog`.
+"""
 function get_start_activities(eventlog::EventLog)
     raw_traces = get_raw_traces(eventlog)
     return unique([first(trace) for trace in raw_traces])
 end
 
 
+"""
+    get_end_activities(eventlog::EventLog)
+
+Get the set of end activities from a given `EventLog`.
+"""
 function get_end_activities(eventlog::EventLog)
     raw_traces = get_raw_traces(eventlog)
     return unique([last(trace) for trace in raw_traces])
 end
 
 
+"""
+    valid_within(set, choice_relation)
+
+Test whether each 2-combination of activities are in the choice relation.
+
+This is a necessary criterion for the set `X_l` in the alpha algorithm.
+"""
 function valid_within(set, choice_relation)
     for (a, b) in combinations(set, 2)
         if (a, b) in choice_relation
@@ -188,6 +249,13 @@ function valid_within(set, choice_relation)
 end
 
 
+"""
+    valid_between(pair, choice_relation)
+
+Test whether each pair (a, b) of elements in two sets A and B are in the choice relation.
+
+This is a necessary criterion for the set `X_l` in the alpha algorithm.
+"""
 function valid_between(pair, causality)
     for tup in Iterators.product(pair[1], pair[2])
         if !(tup in causality)
@@ -198,6 +266,13 @@ function valid_between(pair, causality)
 end
 
 
+"""
+    delete_non_maximal_pairs(x)
+
+Delete all non-maximal pairs from a generated set of place pairs `X_l`.
+
+This step removes redundant place pairs as an intermediate step in the alpha algorithm.
+"""
 function delete_non_maximal_pairs(x)
     maximal = []
     for pair1 in x
@@ -216,6 +291,4 @@ function delete_non_maximal_pairs(x)
     end
     return maximal
 end
-
-
 

@@ -36,6 +36,8 @@ module ProcessMining
     export prune_dfg!
 
     export alpha_miner
+    export get_raw_traces
+    export get_activities
 
     include("io/eventlog.jl")
     include("io/io.jl")
