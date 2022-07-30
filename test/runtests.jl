@@ -1,4 +1,5 @@
 using ProcessMining
+using EzXML
 using Test
 
 @testset "add_places!_test" begin
@@ -19,3 +20,13 @@ end
     @test length(eventlog.traces[1].events) == 5
     @test eventlog.traces[4].events[2].name == "check ticket"
 end
+
+
+@testset "eventlog_from_xml_test" begin
+    xml_doc = EzXML.readxml("running-example.xes")
+    eventlog = ProcessMining.eventlog_from_xml(xml_doc)
+    @test length(eventlog) == 6
+    @test length(eventlog.traces[2].events) == 5
+    @test eventlog.traces[5].events[2].name == "examine casually"
+end
+
