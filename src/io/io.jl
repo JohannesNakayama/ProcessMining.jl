@@ -144,6 +144,8 @@ end
 
 """
     extract_trace_metadata(trace_node::EzXML.Node)
+
+Extract metadata associated with a trace from an `EzXML.Node`.
 """
 function extract_trace_metadata(trace_node::EzXML.Node)
     metadata_nodes = [
