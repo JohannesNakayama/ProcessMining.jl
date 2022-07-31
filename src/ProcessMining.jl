@@ -39,6 +39,8 @@ module ProcessMining
     export get_raw_traces
     export get_activities
 
+    export Quality
+
     include("io/eventlog.jl")
     include("io/io.jl")
     include("process_models/petrinet.jl")
@@ -47,5 +49,6 @@ module ProcessMining
     include("miners/dfg_miner.jl")
     include("miners/alpha_miner.jl")
     include("visualization.jl")
+    include("quality_metrics.jl")
 
 end

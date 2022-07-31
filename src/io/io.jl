@@ -190,13 +190,12 @@ function create_event(event_node::EzXML.Node)
 end
 
 
-# TODO: this seems pretty bad
 """
     pop_or_na!(dict::Dict, key::String)
 
 Pop item at key `key` from `Dict` or return "NA" if `key` doesn't exist.
 """
-function pop_or_na!(dict::Dict, key::String)
+function pop_or_na!(dict::Dict, key::Any)
     try
         return pop!(dict, key)
     catch Exception

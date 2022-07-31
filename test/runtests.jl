@@ -2,6 +2,14 @@ using ProcessMining
 using EzXML
 using Test
 
+
+# TODO:
+#   use more different event logs for testing
+#   comprehensive test spaces for all functions
+
+
+# IO TESTS
+
 @testset "add_places!_test" begin
     pn = PetriNet()
     markings = [0, 0, 1, 0, 2, 0]
@@ -68,7 +76,44 @@ end
 end
 
 
+@testset "extract_trace_metadata_test" begin
+    xml_doc = EzXML.readxml("running-example.xes")
+    ns = ProcessMining.get_namespace(xml_doc)
+    xpath_expr = "./ns:trace"
+    trace_nodes = EzXML.findall(xpath_expr, xml_doc.root, ["ns"=>ns])
+    metadata_3 = ProcessMining.extract_trace_metadata(trace_nodes[3])
+    metadata_5 = ProcessMining.extract_trace_metadata(trace_nodes[5])
+    @test typeof(metadata_3) <: AbstractDict
+    @test metadata_3["creator"] == "Fluxicon Nitro"
+    @test metadata_5["concept:name"] == "5"
+end
 
+
+@testset "create_event_test" begin
+    xml_doc = EzXML.readxml("running-example.xes")
+    ns = ProcessMining.get_namespace(xml_doc)
+    xpath_expr_trace = "./ns:trace"
+    trace_nodes = EzXML.findall(xpath_expr_trace, xml_doc.root, ["ns"=>ns])
+    xpath_expr_event = "./ns:event"
+    event_nodes = EzXML.findall(xpath_expr_event, trace_nodes[1], ["ns"=>ns])
+    event = ProcessMining.create_event(event_nodes[5])
+    @test typeof(event) == Event
+    @test event.name == "reinitiate request"
+    @test typeof(event.attributes) <: AbstractDict
+    @test event.attributes["Resource"] == "Sara"
+    @test event.resource == "Sara"
+end
+
+
+@testset "pop_or_na!_test" begin
+    testdict_1 = Dict(:a => 1, :b => 2)
+    testdict_2 = Dict("c" => 5, "d" => 6, "e" => 7)
+    @test ProcessMining.pop_or_na!(testdict_1, :a) == 1
+    @test_throws KeyError testdict_1[:a]
+    @test ProcessMining.pop_or_na!(testdict_2, "d") == 6
+    @test_throws KeyError testdict_2["d"]
+    @test testdict_2["e"] == 7
+end
 
 
 
